@@ -1,127 +1,99 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Compass } from 'lucide-react';
+type Tab = 'home' | 'test' | 'maestros' | 'campus' | 'dashboard';
 
-const navLinks = [
-  { name: 'Inicio', path: '/' },
-  { name: 'Test', path: '/test' },
-  { name: 'Carreras', path: '/carreras' },
-  { name: 'Campus', path: '/carreras' },
-];
+interface NavbarProps {
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
+  onStartTest: () => void;
+}
 
-export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
+export type { Tab };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
-  };
+export function Navbar({ activeTab, onTabChange, onStartTest }: NavbarProps) {
+  const navLinks: { id: Tab; label: string }[] = [
+    { id: 'home',      label: 'Inicio' },
+    { id: 'test',      label: 'Test' },
+    { id: 'maestros',  label: 'Maestros' },
+    { id: 'campus',    label: 'Campus' },
+  ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-          : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg group-hover:shadow-blue-400/50 transition-all">
-              <Compass className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                BrujulaTec
-              </span>
-              <span className="text-xs text-blue-500 -mt-1">ITSM Monclova</span>
-            </div>
-          </Link>
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
 
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive(link.path)
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-slate-700/70 hover:text-blue-600 hover:bg-blue-50/50'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+        {/* Logo */}
+        <button
+          onClick={() => onTabChange('home')}
+          className="flex items-center gap-2.5 shrink-0"
+        >
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <span className="text-white text-sm font-black">B</span>
           </div>
-
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              to="/admin"
-              className="text-sm text-slate-700/70 hover:text-blue-600 transition-colors"
-            >
-              Iniciar sesion
-            </Link>
-            <Link
-              to="/test"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl"
-            >
-              Hacer el test
-            </Link>
+          <div className="leading-none">
+            <p className="font-black text-gray-900 text-sm">Compasslife</p>
+            <p className="text-blue-500 text-xs font-medium">ITSM Monclova</p>
           </div>
+        </button>
 
+        {/* Links de navegación — desktop */}
+        <div className="hidden sm:flex items-center gap-1">
+          {navLinks.map(link => (
+            <button
+              key={link.id}
+              onClick={() => onTabChange(link.id)}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                activeTab === link.id
+                  ? 'bg-blue-50 text-blue-600 font-semibold'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Derecha */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-blue-50 transition-colors"
+            onClick={() => onTabChange('dashboard')}
+            className="hidden sm:block text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors px-3 py-1.5"
           >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-slate-900" />
-            ) : (
-              <Menu className="w-6 h-6 text-slate-900" />
-            )}
+            Iniciar sesión
+          </button>
+          <button
+            onClick={onStartTest}
+            className="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-blue-700 transition-all active:scale-98"
+          >
+            Hacer el test
           </button>
         </div>
       </div>
 
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100">
-          <div className="px-4 py-4 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                  isActive(link.path)
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-slate-700/70 hover:bg-blue-50'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="pt-4 border-t border-gray-100">
-              <Link
-                to="/test"
-                onClick={() => setMobileMenuOpen(false)}
-                className="bg-blue-600 text-white block text-center px-6 py-3 rounded-lg font-semibold"
-              >
-                Iniciar test vocacional
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Mobile nav — tabs en la parte inferior */}
+      <div className="sm:hidden flex border-t border-gray-100">
+        {navLinks.map(link => (
+          <button
+            key={link.id}
+            onClick={() => onTabChange(link.id)}
+            className={`flex-1 py-2.5 text-xs font-medium transition-all border-b-2 ${
+              activeTab === link.id
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-400'
+            }`}
+          >
+            {link.label}
+          </button>
+        ))}
+        <button
+          onClick={() => onTabChange('dashboard')}
+          className={`flex-1 py-2.5 text-xs font-medium transition-all border-b-2 ${
+            activeTab === 'dashboard'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-400'
+          }`}
+        >
+          Admin
+        </button>
+      </div>
     </nav>
   );
 }
